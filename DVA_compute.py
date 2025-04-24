@@ -113,7 +113,7 @@ class aberration_sh_rotator(object):
 #Default north pole of the orbital axis is the ecliptic north pole, as viewed in Galactic coordinates.
 class planar_orbit_velocity_direction(object):
     
-    def __init__(self, north_pole_theta = 29.81*np.pi/180., north_pole_phi = 93.38*np.pi/180):
+    def __init__(self, north_pole_theta = (90 - 29.81)*np.pi/180., north_pole_phi = 93.38*np.pi/180):
         self.north_pole_theta = north_pole_theta
         self.north_pole_phi = north_pole_phi
         #Find a unit vector perpendicular to the input vector. First, cross y-hat with orbital north pole.
