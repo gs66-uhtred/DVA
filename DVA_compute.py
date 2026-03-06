@@ -7,12 +7,15 @@ class aberration_sh_rotator(object):
     def __init__(self, beta = 10**-4, order = 3):
         if order>0:
             self.y10_initial = beta
+            self.y20_initial = 0
+            self.y30_initial = 0
         if order>1:
             self.y20_initial = -0.5*beta**2
         if order>2:
             self.y30_initial = (1./6.)*(2./5.)*beta**3
             self.y10_initial += (-1./6.)*(7./5.)*beta**3
-    
+        self.d_r_hat = (1 - (self.y10_initial + self.y20_initial + self.y30_initial)**2)**0.5 - 1
+
     def generate_scalar_spherical_harmonics(self, thetas, phis):
         #ell = 1.
         self.Y10 = np.cos(thetas)
@@ -107,6 +110,11 @@ class aberration_sh_rotator(object):
         self.full_rotated_aberration_theta_hat = self.rotated_aberration_ell1_theta_hat + self.rotated_aberration_ell2_theta_hat + self.rotated_aberration_ell3_theta_hat
         self.full_rotated_aberration_phi_hat = self.rotated_aberration_ell1_phi_hat + self.rotated_aberration_ell2_phi_hat + self.rotated_aberration_ell3_phi_hat
         self.full_rotated_aberration_magnitude = np.sqrt(self.full_rotated_aberration_theta_hat**2 + self.full_rotated_aberration_phi_hat**2)
+        self.aberration_spherical_vector = np.zeros((self.full_rotated_aberration_theta_hat.size, 3))
+        self.aberration_spherical_vector[:,0] = self.d_r_hat
+        self.aberration_spherical_vector[:,1] = self.full_rotated_aberration_theta_hat
+        self.aberration_spherical_vector[:,2] = self.full_rotated_aberration_phi_hat
+
 
 #planar_orbit_velocity_direction is a class to compute the velocity direction as a function of time for an orbit in a plane.
 #Currently only implemented for circular orbit.
