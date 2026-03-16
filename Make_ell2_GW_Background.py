@@ -65,14 +65,25 @@ class gw_background(object):
         non_zero_frequencies = copy.deepcopy(self.frequencies)
         non_zero_frequencies[0] = non_zero_frequencies[1]/10.
         if type == 'BHBB':
+            print('Black hole binary background.')
             self.index = 2./3.
+        elif type == 'NANOGRAVPowerLawFit':
+            print('NANOGRAV power law fit.')
+            #Characteristic strain index is -0.2.
+            self.index = 1.6
         else:
             self.index = 1.
         self.gw_energy_per_log_f = np.zeros(self.frequencies.size)
         self.gw_energy_per_log_f[1:] = self.gw_energy_per_log_f_at_25_hz*(self.frequencies[1:]/25.)**self.index
         self.dn_theta_freq_variance = (1./(4*np.pi))*(self.H0**2)*(non_zero_frequencies**-3)*self.gw_energy_per_log_f*delta_f
         self.hc = ((3/(2*np.pi**2))*self.H0**2*non_zero_frequencies**-2*self.gw_energy_per_log_f)**0.5
-
+        if type == 'NANOGRAVPowerLawFit':
+            #Amplitude of characteristic strain at 1./year is 6.4e-15.
+            factor = (6.4e-15)/(self.hc[-1]*((365*24.*3600)**-1/self.frequencies[-1])**-0.2)
+            self.hc = self.hc*factor
+            self.gw_energy_per_log_f_at_25_hz = self.gw_energy_per_log_f_at_25_hz*factor**2
+            self.gw_energy_per_log_f = self.gw_energy_per_log_f*factor**2
+            self.dn_theta_freq_variance = self.dn_theta_freq_variance*factor**2
         #Also computed the expected variance in time bins of size 1/2f_nyquist. 
         self.dt_1bin = 1./(2*f_nyquist)
         self.dn_theta_time_variance = np.sum(self.dn_theta_freq_variance[1:])
@@ -83,7 +94,7 @@ class gw_background(object):
         if type(d_f) == type(None):
             d_f = self.delta_f
         self.full_sky_astrometric_gw_variance_dn_freq = (astrometric_rms_per_root_second**4)/(num_stars**2*d_f*total_obs_time**3)
-        self.full_sky_astrometric_gw_variance_hc = (self.full_sky_astrometric_gw_variance_dn_freq**0.5)*(self.hc*self.dn_theta_freq_variance**-0.5)
+        self.full_sky_astrometric_gw_variance_hc = (self.full_sky_astrometric_gw_variance_dn_freq**0.5)*(self.hc*self.dn_theta_freq_variance**-0.5)**2
 
     def Compute_C2_frequency_values(self):
         #83 percent of the deflection power is due to the ell=2 mode.
